@@ -26,47 +26,50 @@ class PancakeOrderApp(App):
     self.comms = Comms()
 
   def update(self, delta):
-      if self.button_states.get(BUTTON_TYPES["UP"]):
-          send_task = self.comms.send(
-            message="bacon",
-            mac=PEER_MAC,
-          )
-          self.baconText = "bacon"
-          asyncio.create_task(send_task)
-          self.hasSent = True
-      elif self.button_states.get(BUTTON_TYPES["CONFIRM"]):
-          send_task = self.comms.send(
-            message="cheese",
-            mac=PEER_MAC,
-          )
-          self.baconText = "cheese"
-          asyncio.create_task(send_task)
-          self.hasSent = True
-      elif self.button_states.get(BUTTON_TYPES["RIGHT"]):
-          send_task = self.comms.send(
-            message="bandc",
-            mac=PEER_MAC,
-          )
-          self.baconText = "bacon & cheese"
-          asyncio.create_task(send_task)
-          self.hasSent = True
-      elif self.button_states.get(BUTTON_TYPES["DOWN"]):
-          send_task = self.comms.send(
-            message="plain",
-            mac=PEER_MAC,
-          )
-          self.baconText = "plain"
-          asyncio.create_task(send_task)
-          self.hasSent = True
-      if self.hasSent:
-          self.baconAndCheeseText = "Order ACK"
-          self.cheeseText = ""
-          self.plainText = ""
+      if not self.hasSent:
+        if self.button_states.get(BUTTON_TYPES["UP"]):
+            send_task = self.comms.send(
+                message="bacon",
+                mac=PEER_MAC,
+            )
+            self.baconText = "bacon"
+            asyncio.create_task(send_task)
+            self.hasSent = True
+        elif self.button_states.get(BUTTON_TYPES["CONFIRM"]):
+            send_task = self.comms.send(
+                message="cheese",
+                mac=PEER_MAC,
+            )
+            self.baconText = "cheese"
+            asyncio.create_task(send_task)
+            self.hasSent = True
+        elif self.button_states.get(BUTTON_TYPES["RIGHT"]):
+            send_task = self.comms.send(
+                message="bandc",
+                mac=PEER_MAC,
+            )
+            self.baconText = "bacon & cheese"
+            asyncio.create_task(send_task)
+            self.hasSent = True
+        elif self.button_states.get(BUTTON_TYPES["DOWN"]):
+            send_task = self.comms.send(
+                message="plain",
+                mac=PEER_MAC,
+            )
+            self.baconText = "plain"
+            asyncio.create_task(send_task)
+            self.hasSent = True
+        if not self.hasSent:
+            self.baconText = "A for bacon"
+            self.cheeseText = "B for bcn&chs"
+            self.baconAndCheeseText = "C for cheese"
+            self.plainText = "D for plain" 
       else:
-          self.baconText = "A for bacon"
-          self.cheeseText = "B for bcn&chs"
-          self.baconAndCheeseText = "C for cheese"
-          self.plainText = "D for plain"                                                                  
+          self.baconAndCheeseText = "orders"
+          self.cheeseText = "No double"
+          self.plainText = "allowed"
+          self.baconText = "Order sent."
+
          
   def draw(self, ctx):
     clear_background(ctx)
@@ -127,6 +130,7 @@ class Comms:
         except OSError as e:
             if "ESP_ERR_ESPNOW_EXIST" in str(e):
                 print("Peer already added")
+                raise e
             else:
                 raise e
 
